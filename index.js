@@ -4,92 +4,89 @@ app.use(express.json())
 
 const uuid = require("uuid");
 
-cç
+const users = [];
+
+const chekeUserId = (request, response, next) => {
+
+   const { id } = request.params;
+
+   const index = users.findIndex( user => user.id === id);
+
+   if(index < 0){
+     return response.status(404).json({error: "User not found"})
+   }
+
+   request.userIndex = index;
+   request.userId = id;
+
+   next()
+}
 
 
-app.get('/order', (resquest, response) => {
+
+app.get('/order/', (request, response) => {
+   return response.json(users)
+})
+
+app.post('/order/', (request, response) => {
+   const { order, clientName, price, status} = request.body;
+
+   const user = {id:uuid.v4(), order, clientName, price, status};
+
+   users.push(user);
+ 
    return response.json(users);
+})
 
+app.put('/order/:id', chekeUserId, (request, response) => {
+   const {order, clientName, price, status} = request.body;
+   const id = request.userId;
+   const index = request.userIndex;
+
+   const updateServer = {id, order, clientName, price, status};
+
+   users[index] = updateServer;
+
+   return response.json(updateServer);
 });
 
-app.get('/order/:id', (request, response) => {
-   const { id } = request.params;
-  
-   const index = users.findIndex( user => user.id === id);
 
-   if(index < 0){
-      return response.status(404).json({message: "User not found"});
-   }
-
-   
-   return response.json(users[index]);
- })
-
-
-app.post('/order/', (resquest, response) => {
-
-const { order, clientName, price, status } = resquest.body;
-
-const user = { id:uuid.v4(), order, clientName, price, status };
-
-users.push(user);
-console.log(users);
-
-return response.status(201).json(user);
-
-
-});
-
-app.put('/order/:id', (request, response) => {
-   const { id } = request.params;
-   const { order, clientName, price} = request.body;
-
-   const updateUsers = { order, clientName, price, id};
-
-   const index = users.findIndex( user => user.id === id);
-
-   if(index < 0){
-      return response.status(404).json({message: "User not found"});
-   }
-
-   users[index] = updateUsers;
-
-   return response.json(updateUsers);
-  
-
- });
-
- app.delete('/order/:id', (request, response) => {
-   const { id } = request.params;
-
-   const index = users.findIndex( user => user.id === id);
+app.delete('/order/:id', chekeUserId, (request, response) => {
+   const index = request.userIndex;
 
    users.splice(index, 1);
-   return response.status(404).json(users);
- });
 
- 
- app.patch('/order/:id', (resquest, response) => {
-   const { id } = resquest.params;
-   const { order, clientName, price, status } = resquest.params;
-   
-
-   const updatSave = {  order, clientName, price, status, id  };
-   updatSave.status = "Pronto"
-   
-   const index = users.findIndex( user => user.id === id);
-   
-   if(index < 0){
-      return response.status(404).json({message: "User not found"});
-   }
-   console.log(updatSave)
-   
-   users[index] = updatSave;
-   
-   
-   return response.json(updatSave);
-
+   return response.status(204).json()
 });
+
+app.get('/order/:id', chekeUserId, (request, response) => {
+   const id = request.userId;
+   const index = request.userIndex;
+
+   users[id] = index;
+
+   return response.json(users[index]);
+});
+
+app.patch('/order/:id', chekeUserId, (request, response) => {
+   const {status} = request.body;
+   const id = request.userId;
+   const index = request.userIndex;
+
+   
+   const updateServer = {id, status};
+   
+   updateServer[index] = users;
+   
+
+      return response.json(users);
+})
+
+
+
+
+  
+
 
 
 app.listen(3000, (resquest, response) => {
