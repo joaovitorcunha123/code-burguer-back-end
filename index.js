@@ -22,13 +22,24 @@ const chekeUserId = (request, response, next) => {
    next()
 }
 
+const checkurl = (request, response, next) => {
+
+   const method = request.method;
+   const url = request.url;
+   console.log(`${method}, ${url}`);
 
 
-app.get('/order/', (request, response) => {
+
+   next()
+}
+
+
+
+app.get('/order/', checkurl,  (request, response) => {
    return response.json(users)
 })
 
-app.post('/order/', (request, response) => {
+app.post('/order/', checkurl,(request, response) => {
    const { order, clientName, price, status} = request.body;
 
    const user = {id:uuid.v4(), order, clientName, price, status};
@@ -38,7 +49,7 @@ app.post('/order/', (request, response) => {
    return response.json(users);
 })
 
-app.put('/order/:id', chekeUserId, (request, response) => {
+app.put('/order/:id', chekeUserId, checkurl, (request, response) => {
    const {order, clientName, price, status} = request.body;
    const id = request.userId;
    const index = request.userIndex;
@@ -51,7 +62,7 @@ app.put('/order/:id', chekeUserId, (request, response) => {
 });
 
 
-app.delete('/order/:id', chekeUserId, (request, response) => {
+app.delete('/order/:id', chekeUserId, checkurl,(request, response) => {
    const index = request.userIndex;
 
    users.splice(index, 1);
@@ -59,7 +70,7 @@ app.delete('/order/:id', chekeUserId, (request, response) => {
    return response.status(204).json()
 });
 
-app.get('/order/:id', chekeUserId, (request, response) => {
+app.get('/order/:id', chekeUserId, checkurl, (request, response) => {
    const id = request.userId;
    const index = request.userIndex;
 
@@ -68,18 +79,15 @@ app.get('/order/:id', chekeUserId, (request, response) => {
    return response.json(users[index]);
 });
 
-app.patch('/order/:id', chekeUserId, (request, response) => {
-   const {status} = request.body;
-   const id = request.userId;
+app.patch('/order/:id', chekeUserId, checkurl, (request, response) => {
+   
    const index = request.userIndex;
-
-   
-   const updateServer = {id, status};
-   
-   updateServer[index] = users;
+   const purchaseOrder = users[index]
+ 
+   purchaseOrder.status = "Pedido Pronto"
    
 
-      return response.json(users);
+      return response.json(purchaseOrder);
 })
 
 
